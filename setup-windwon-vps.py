@@ -1,11 +1,13 @@
 import os
 import urllib.request
 
+RDP_PORT = 53329
+VM_QUICK_CONFIG_URL = "https://file.lowendviet.com/VMQuickConfig/VMQuickConfig.exe"
+UNIKEY_URL = "http://www.unikey.org/download/UniKey4.3RC4-140823-Win64.zip"
+
 PRODUCT_KEY = "WX4NM-KYWYW-QJJR4-XV3QB-6VM33"
 EDITION = "ServerDatacenter"
 KMS_SERVER = "kms.digiboy.ir"
-VM_QUICK_CONFIG_URL = "https://file.lowendviet.com/VMQuickConfig/VMQuickConfig.exe"
-UNIKEY_URL = "http://www.unikey.org/download/UniKey4.3RC4-140823-Win64.zip"
 
 def run_command(command):
     try:
@@ -45,12 +47,12 @@ def install_chocolatey_packages():
     for package in packages:
         run_command(f"choco install {package} -y")
 
-def configure_remote_desktop(port=53329):
+def configure_remote_desktop():
     commands = [
+        f"reg add \"HKLM\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp\" /v PortNumber /t REG_DWORD /d {RDP_PORT} /f",
         "powershell Set-ItemProperty -Path 'HKLM:\\System\\CurrentControlSet\\Control\\Terminal Server' -Name fDenyTSConnections -Value 0",
         "powershell Add-LocalGroupMember -Group \"Remote Desktop Users\" -Member \"$env:USERNAME\"",
         "netsh advfirewall firewall set rule group=\"remote desktop\" new enable=Yes",
-        f"reg add \"HKLM\\System\\CurrentControlSet\\Control\\Terminal Server\\WinStations\\RDP-Tcp\" /v PortNumber /t REG_DWORD /d {port} /f",
         "net stop termservice /y",
         "net start termservice"
     ]
@@ -74,10 +76,10 @@ def install_unikey():
     print("UniKey downloaded successfully. Please unzip and install manually.")
 
 if __name__ == "__main__":
+    configure_remote_desktop()
     activate_windows()
     uninstall_internet_explorer()
     install_chocolatey_packages()
-    configure_remote_desktop()
     disable_ctrl_alt_del()
     download_vm_quick_config()
     install_unikey()
