@@ -1,25 +1,26 @@
 import os
 import urllib.request
+import subprocess
 
+# Define global variables
 RDP_PORT = 53329
 VM_QUICK_CONFIG_URL = "https://file.lowendviet.com/VMQuickConfig/VMQuickConfig.exe"
 UNIKEY_URL = "http://www.unikey.org/download/UniKey4.3RC4-140823-Win64.zip"
 GENLOGIN_URL = "https://dl.genlogin.com/GenLogin%20Setup.exe" 
-
 PRODUCT_KEY = "WX4NM-KYWYW-QJJR4-XV3QB-6VM33"
 EDITION = "ServerDatacenter"
 KMS_SERVER = "kms.digiboy.ir"
 
+# Define functions
 def run_command(command):
     try:
         print(f"Running command: {command}...")
-        result = os.system(command)
-        if result == 0:
-            print("Command completed successfully.")
-        else:
-            print(f"Command failed with exit code {result}.")
+        subprocess.run(command, shell=True, check=True)
+        print("Command completed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Command failed with exit code {e.returncode}.")
     except Exception as e:
-        print(f"An error occurred while running command: {command}", str(e))
+        print(f"An error occurred while running command: {e}")
 
 def activate_windows():
     commands = [
@@ -31,22 +32,22 @@ def activate_windows():
         "slmgr /ato",
         "slmgr /dlv"
     ]
-
     for command in commands:
         run_command(command)
 
 def uninstall_internet_explorer():
-    command = "powershell \"Get-WindowsFeature -Name 'Internet-Explorer-Optional-amd64' | Uninstall-WindowsFeature -Remove\""
-    run_command(command)
+    run_command("powershell \"Get-WindowsFeature -Name 'Internet-Explorer-Optional-amd64' | Uninstall-WindowsFeature -Remove\"")
 
 def install_chocolatey_packages():
-    if os.system("choco -v") != 0:
-        print("Chocolatey is not installed. Installing Chocolatey...")
-        os.system("Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))")
-
-    packages = ["vscode", "googlechrome", "git", "notepadplusplus", "dotnet4.8", "7zip", "winrar", "putty"]
-    for package in packages:
-        run_command(f"choco install {package} -y")
+    try:
+        if os.system("choco -v") != 0:
+            print("Chocolatey is not installed. Installing Chocolatey...")
+            os.system("Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))")
+        packages = ["vscode", "googlechrome", "git", "notepadplusplus", "dotnet4.8", "7zip", "winrar", "putty"]
+        for package in packages:
+            run_command(f"choco install {package} -y")
+    except Exception as e:
+        print(f"An error occurred while installing Chocolatey packages: {e}")
 
 def configure_remote_desktop():
     commands = [
@@ -61,100 +62,89 @@ def configure_remote_desktop():
         run_command(command)
 
 def disable_ctrl_alt_del():
-    command = "reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v DisableCAD /t REG_DWORD /d 1 /f"
-    run_command(command)
+    run_command("reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v DisableCAD /t REG_DWORD /d 1 /f")
 
 def download_vm_quick_config():
     filename = "VMQuickConfig.exe"
-    print(f"Downloading {filename} from {VM_QUICK_CONFIG_URL}...")
-    urllib.request.urlretrieve(VM_QUICK_CONFIG_URL, filename)
-    print(f"{filename} has been downloaded successfully.")
-
-
-
-def update_drivers():
-    print("Checking for driver updates using Windows Update...")
-    # This uses PowerShell command to search for driver updates
-    subprocess.run(["powershell", "Get-WindowsUpdate -Driver"])
-    print("Installing available driver updates...")
-    # This installs any available driver updates
-    subprocess.run(["powershell", "Install-WindowsUpdate -Driver -AcceptAll -AutoReboot"])
-
-def download_and_install_windows_updates():
-    print("Checking for Windows updates...")
-    # This command searches for available Windows updates
-    subprocess.run(["powershell", "Get-WindowsUpdate"])
-    print("Downloading and installing Windows updates...")
-    # This command installs available Windows updates and reboots if necessary
-    subprocess.run(["powershell", "Install-WindowsUpdate -AcceptAll -AutoReboot"])
-
+    try:
+        print(f"Downloading {filename} from {VM_QUICK_CONFIG_URL}...")
+        urllib.request.urlretrieve(VM_QUICK_CONFIG_URL, filename)
+        print(f"{filename} has been downloaded successfully.")
+    except Exception as e:
+        print(f"An error occurred while downloading {filename}: {e}")
 
 def install_unikey():
     unikey_filename = "UniKey4.3RC4-140823-Win64.zip"
-    print(f"Downloading UniKey from {UNIKEY_URL}...")
-    urllib.request.urlretrieve(UNIKEY_URL, unikey_filename)
-    print("UniKey downloaded successfully. Please unzip and install manually.")
-
+    try:
+        print(f"Downloading UniKey from {UNIKEY_URL}...")
+        urllib.request.urlretrieve(UNIKEY_URL, unikey_filename)
+        print("UniKey downloaded successfully. Please unzip and install manually.")
+    except Exception as e:
+        print(f"An error occurred while downloading UniKey: {e}")
 
 def download_and_install_genlogin():
     local_filename = "GenLoginSetup.exe"
-    print(f"Downloading GenLogin from {UNIKEY_URL}...")
-    
-    urllib.request.urlretrieve(UNIKEY_URL, local_filename)
-    print("Download completed.")
-    
-    print("Installing GenLogin...")
-    os.system(local_filename)
-    print("GenLogin installation process has started. Follow the on-screen instructions to complete the installation.")
+    try:
+        print(f"Downloading GenLogin from {GENLOGIN_URL}...")
+        urllib.request.urlretrieve(GENLOGIN_URL, local_filename)
+        print("Download completed.")
+        print("Installing GenLogin...")
+        os.system(local_filename)
+        print("GenLogin installation process has started. Follow the on-screen instructions to complete the installation.")
+    except Exception as e:
+        print(f"An error occurred while downloading or installing GenLogin: {e}")
 
 def disable_services():
     services_to_disable = ['Fax', 'WSearch', 'XblGameSave', 'XboxGipSvc']
     for service in services_to_disable:
-        print(f"Disabling {service} service...")
-        subprocess.run(['powershell', 'Set-Service', service, '-StartupType', 'Disabled'], check=True)
-        subprocess.run(['powershell', 'Stop-Service', service], check=True)
-    print("Disabled unnecessary services successfully.")
+        run_command(f'powershell Set-Service {service} -StartupType Disabled')
+        run_command(f'powershell Stop-Service {service}')
 
 def update_and_cleanup():
-    print("Installing Windows Updates...")
-    subprocess.run(['powershell', 'Install-WindowsUpdate', '-AcceptAll', '-AutoReboot'], check=True)
-    print("Performing system cleanup...")
-    subprocess.run(['cleanmgr', '/sagerun:1'], check=True)
+    try:
+        print("Installing Windows Updates...")
+        run_command('powershell Install-WindowsUpdate -AcceptAll -AutoReboot')
+        print("Performing system cleanup...")
+        run_command('cleanmgr /sagerun:1')
+    except Exception as e:
+        print(f"An error occurred during update and cleanup: {e}")
 
 def configure_security_settings():
-    subprocess.run(['powershell', 'Set-NetFirewallProfile', '-Profile', 'Domain,Public,Private', '-Enabled', 'True'], check=True)
-    print("Enabled Windows Firewall for all profiles.")
-    
-    subprocess.run(['powershell', 'Set-SmbServerConfiguration', '-EnableSMB1Protocol', 'False'], check=True)
-    print("Disabled SMBv1 protocol.")
-    
-    subprocess.run(['powershell', 'net', 'user', 'Guest', '/active:no'], check=True)
-    print("Disabled Guest account.")
-    
+    try:
+        run_command('powershell Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True')
+        print("Enabled Windows Firewall for all profiles.")
+        run_command('powershell Set-SmbServerConfiguration -EnableSMB1Protocol False')
+        print("Disabled SMBv1 protocol.")
+        run_command('powershell net user Guest /active:no')
+        print("Disabled Guest account.")
+    except Exception as e:
+        print(f"An error occurred while configuring security settings: {e}")
 
 def install_docker():
-    print("Installing Docker...")
+    try:
+        print("Installing Docker...")
+        run_command('powershell Install-Module -Name DockerMsftProvider -Repository PSGallery -Force')
+        run_command('powershell Install-Package -Name docker -ProviderName DockerMsftProvider -Force')
+        print("Docker installed successfully. System will restart to complete the installation.")
+        input("Press Enter to restart...")
+        os.system('shutdown /r /t 0')
+    except Exception as e:
+        print(f"An error occurred while installing Docker: {e}")
 
-    subprocess.run(['powershell', '-Command', 'Install-Module -Name DockerMsftProvider -Repository PSGallery -Force'], check=True)
-
-    subprocess.run(['powershell', '-Command', 'Install-Package -Name docker -ProviderName DockerMsftProvider -Force'], check=True)
-
-    print("Docker installed successfully. System will restart to complete the installation.")
-    input("Press Enter to restart...")
-    subprocess.run(['shutdown', '/r', '/t', '0'])
-
-
+# Main execution
 if __name__ == "__main__":
-    configure_remote_desktop()
-    activate_windows()
-    uninstall_internet_explorer()
-    install_chocolatey_packages()
-    disable_ctrl_alt_del()
-    download_vm_quick_config()
-    install_unikey()
-    update_drivers()
-    download_and_install_windows_updates()
-    disable_services()
-    update_and_cleanup()
-    configure_security_settings()
-    install_docker() 
+    try:
+        configure_remote_desktop()
+        activate_windows()
+        uninstall_internet_explorer()
+        install_chocolatey_packages()
+        disable_ctrl_alt_del()
+        download_vm_quick_config()
+        install_unikey()
+        download_and_install_genlogin()
+        disable_services()
+        update_and_cleanup()
+        configure_security_settings()
+        install_docker()
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
