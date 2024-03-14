@@ -62,7 +62,12 @@ def configure_remote_desktop():
         run_command(command)
 
 def disable_ctrl_alt_del():
-    run_command("reg add \"HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\" /v DisableCAD /t REG_DWORD /d 1 /f")
+    try:
+        print("Disabling Control-Alt-Delete requirement...")
+        subprocess.run(['powershell', 'Set-ItemProperty -Path "HKLM:\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon" -Name "DisableCAD" -Value 1'], check=True)
+        print("Control-Alt-Delete requirement disabled successfully.")
+    except Exception as e:
+        print(f"An error occurred while disabling Control-Alt-Delete requirement: {e}")
 
 def download_vm_quick_config():
     filename = "VMQuickConfig.exe"
@@ -135,7 +140,6 @@ def create_control_panel_shortcut():
         print("Control Panel shortcut created successfully.")
     except Exception as e:
         print(f"An error occurred while creating Control Panel shortcut: {e}")
-
 
 def install_docker():
     try:
