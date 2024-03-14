@@ -4,6 +4,7 @@ import urllib.request
 RDP_PORT = 53329
 VM_QUICK_CONFIG_URL = "https://file.lowendviet.com/VMQuickConfig/VMQuickConfig.exe"
 UNIKEY_URL = "http://www.unikey.org/download/UniKey4.3RC4-140823-Win64.zip"
+GENLOGIN_URL = "https://dl.genlogin.com/GenLogin%20Setup.exe" 
 
 PRODUCT_KEY = "WX4NM-KYWYW-QJJR4-XV3QB-6VM33"
 EDITION = "ServerDatacenter"
@@ -69,11 +70,44 @@ def download_vm_quick_config():
     urllib.request.urlretrieve(VM_QUICK_CONFIG_URL, filename)
     print(f"{filename} has been downloaded successfully.")
 
+
+
+def update_drivers():
+    print("Checking for driver updates using Windows Update...")
+    # This uses PowerShell command to search for driver updates
+    subprocess.run(["powershell", "Get-WindowsUpdate -Driver"])
+    print("Installing available driver updates...")
+    # This installs any available driver updates
+    subprocess.run(["powershell", "Install-WindowsUpdate -Driver -AcceptAll -AutoReboot"])
+
+def download_and_install_windows_updates():
+    print("Checking for Windows updates...")
+    # This command searches for available Windows updates
+    subprocess.run(["powershell", "Get-WindowsUpdate"])
+    print("Downloading and installing Windows updates...")
+    # This command installs available Windows updates and reboots if necessary
+    subprocess.run(["powershell", "Install-WindowsUpdate -AcceptAll -AutoReboot"])
+
+
 def install_unikey():
     unikey_filename = "UniKey4.3RC4-140823-Win64.zip"
     print(f"Downloading UniKey from {UNIKEY_URL}...")
     urllib.request.urlretrieve(UNIKEY_URL, unikey_filename)
     print("UniKey downloaded successfully. Please unzip and install manually.")
+
+
+def download_and_install_genlogin():
+    local_filename = "GenLoginSetup.exe"
+    print(f"Downloading GenLogin from {UNIKEY_URL}...")
+    
+    urllib.request.urlretrieve(UNIKEY_URL, local_filename)
+    print("Download completed.")
+    
+    print("Installing GenLogin...")
+    os.system(local_filename)
+    print("GenLogin installation process has started. Follow the on-screen instructions to complete the installation.")
+
+
 
 if __name__ == "__main__":
     configure_remote_desktop()
@@ -83,3 +117,5 @@ if __name__ == "__main__":
     disable_ctrl_alt_del()
     download_vm_quick_config()
     install_unikey()
+    update_drivers()
+    download_and_install_windows_updates()
