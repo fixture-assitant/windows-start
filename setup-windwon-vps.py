@@ -162,7 +162,7 @@ if __name__ == "__main__":
         disable_services()
         update_and_cleanup()
         configure_security_settings()
-        create_my_computer_shortcut()
+        create_my_computer_shortcut() 
         create_network_shortcut()
         create_control_panel_shortcut()
         install_docker()
