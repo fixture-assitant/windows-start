@@ -107,6 +107,41 @@ def download_and_install_genlogin():
     os.system(local_filename)
     print("GenLogin installation process has started. Follow the on-screen instructions to complete the installation.")
 
+def disable_services():
+    services_to_disable = ['Fax', 'WSearch', 'XblGameSave', 'XboxGipSvc']
+    for service in services_to_disable:
+        print(f"Disabling {service} service...")
+        subprocess.run(['powershell', 'Set-Service', service, '-StartupType', 'Disabled'], check=True)
+        subprocess.run(['powershell', 'Stop-Service', service], check=True)
+    print("Disabled unnecessary services successfully.")
+
+def update_and_cleanup():
+    print("Installing Windows Updates...")
+    subprocess.run(['powershell', 'Install-WindowsUpdate', '-AcceptAll', '-AutoReboot'], check=True)
+    print("Performing system cleanup...")
+    subprocess.run(['cleanmgr', '/sagerun:1'], check=True)
+
+def configure_security_settings():
+    subprocess.run(['powershell', 'Set-NetFirewallProfile', '-Profile', 'Domain,Public,Private', '-Enabled', 'True'], check=True)
+    print("Enabled Windows Firewall for all profiles.")
+    
+    subprocess.run(['powershell', 'Set-SmbServerConfiguration', '-EnableSMB1Protocol', 'False'], check=True)
+    print("Disabled SMBv1 protocol.")
+    
+    subprocess.run(['powershell', 'net', 'user', 'Guest', '/active:no'], check=True)
+    print("Disabled Guest account.")
+    
+
+def install_docker():
+    print("Installing Docker...")
+
+    subprocess.run(['powershell', '-Command', 'Install-Module -Name DockerMsftProvider -Repository PSGallery -Force'], check=True)
+
+    subprocess.run(['powershell', '-Command', 'Install-Package -Name docker -ProviderName DockerMsftProvider -Force'], check=True)
+
+    print("Docker installed successfully. System will restart to complete the installation.")
+    input("Press Enter to restart...")
+    subprocess.run(['shutdown', '/r', '/t', '0'])
 
 
 if __name__ == "__main__":
@@ -119,3 +154,7 @@ if __name__ == "__main__":
     install_unikey()
     update_drivers()
     download_and_install_windows_updates()
+    disable_services()
+    update_and_cleanup()
+    configure_security_settings()
+    install_docker() 
