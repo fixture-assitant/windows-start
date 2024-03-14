@@ -120,6 +120,23 @@ def configure_security_settings():
     except Exception as e:
         print(f"An error occurred while configuring security settings: {e}")
 
+def create_network_shortcut():
+    try:
+        print("Creating Network shortcut on desktop...")
+        subprocess.run(['powershell', '$wshShell = New-Object -ComObject WScript.Shell; $shortcut = $wshShell.CreateShortcut("$env:USERPROFILE\\Desktop\\Network.lnk"); $shortcut.TargetPath = "explorer.exe"; $shortcut.Arguments = "::{" + "F02C1A0D-BE21-4350-88B0-7367FC96EF3C" + "}"; $shortcut.Save()'], check=True)
+        print("Network shortcut created successfully.")
+    except Exception as e:
+        print(f"An error occurred while creating Network shortcut: {e}")
+
+def create_control_panel_shortcut():
+    try:
+        print("Creating Control Panel shortcut on desktop...")
+        subprocess.run(['powershell', '$wshShell = New-Object -ComObject WScript.Shell; $shortcut = $wshShell.CreateShortcut("$env:USERPROFILE\\Desktop\\Control Panel.lnk"); $shortcut.TargetPath = "explorer.exe"; $shortcut.Arguments = "shell:::{26EE0668-A00A-44D7-9371-BEB064C98683}"; $shortcut.Save()'], check=True)
+        print("Control Panel shortcut created successfully.")
+    except Exception as e:
+        print(f"An error occurred while creating Control Panel shortcut: {e}")
+
+
 def install_docker():
     try:
         print("Installing Docker...")
@@ -145,6 +162,9 @@ if __name__ == "__main__":
         disable_services()
         update_and_cleanup()
         configure_security_settings()
+        create_my_computer_shortcut()
+        create_network_shortcut()
+        create_control_panel_shortcut()
         install_docker()
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
